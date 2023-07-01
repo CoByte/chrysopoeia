@@ -6,17 +6,29 @@ defmodule Chrysopoeia.SequenceTest do
   test "list" do
     alias Chrysopoeia.Base.String, as: Str
 
-    parser =
+    parser1 =
       Seq.list([
         Str.tag("a"),
         Str.tag("b"),
         Str.tag("c")
       ])
 
-    assert {:ok, ["a", "b", "c"], ""} = parser.("abc")
-    assert {:ok, ["a", "b", "c"], "def"} = parser.("abcdef")
-    assert {:err, _} = parser.("defabc")
-    assert {:err, _} = parser.("ab")
+    assert {:ok, ["a", "b", "c"], ""} = parser1.("abc")
+    assert {:ok, ["a", "b", "c"], "def"} = parser1.("abcdef")
+    assert {:err, _} = parser1.("defabc")
+    assert {:err, _} = parser1.("ab")
+
+    parser2 =
+      Seq.list([
+        Str.tag("a"),
+        {:ig, Str.tag("b")},
+        Str.tag("c")
+      ])
+
+    assert {:ok, ["a", "c"], ""} = parser2.("abc")
+    assert {:ok, ["a", "c"], "def"} = parser2.("abcdef")
+    assert {:err, _} = parser2.("defabc")
+    assert {:err, _} = parser2.("ab")
   end
 
   test "prefix" do

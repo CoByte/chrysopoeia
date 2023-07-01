@@ -6,18 +6,28 @@ defmodule Chrysopoeia.Sequence do
   @doc """
   A combinator. Takes a list of parsers, uses each parser in the
   list sequentially, and returns a list of their outputs.
+
+  By wrapping a parser in `{:ig, parser}`, its output will not be included in
+  the final output.
   """
   def list(parsers) do
-    &list_parser(parsers, &1)
+    &list_parser(&1, parsers)
   end
 
-  defp list_parser([], str) do
+  defp list_parser(str, []) do
     {:ok, [], str}
   end
 
-  defp list_parser([parser | parsers], str) do
+  defp list_parser(str, [{:ig, parser} | parsers]) do
+    with {:ok, _, str} <- parser.(str),
+         {:ok, out, str} <- list_parser(str, parsers) do
+      {:ok, out, str}
+    end
+  end
+
+  defp list_parser(str, [parser | parsers]) do
     with {:ok, data, str} <- parser.(str),
-         {:ok, out, str} <- list_parser(parsers, str) do
+         {:ok, out, str} <- list_parser(str, parsers) do
       {:ok, [data | out], str}
     end
   end
