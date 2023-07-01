@@ -4,13 +4,13 @@ defmodule Chrysopoeia.SequenceTest do
   alias Chrysopoeia.Sequence, as: Seq
 
   test "list" do
-    alias Chrysopoeia.Character, as: Char
+    alias Chrysopoeia.Base.String, as: Str
 
     parser =
       Seq.list([
-        Char.tag("a"),
-        Char.tag("b"),
-        Char.tag("c")
+        Str.tag("a"),
+        Str.tag("b"),
+        Str.tag("c")
       ])
 
     assert {:ok, ["a", "b", "c"], ""} = parser.("abc")
@@ -20,9 +20,9 @@ defmodule Chrysopoeia.SequenceTest do
   end
 
   test "prefix" do
-    alias Chrysopoeia.Character, as: Char
+    alias Chrysopoeia.Base.String, as: Str
 
-    parser = Seq.prefix(Char.tag("ab"), Char.tag("cd"))
+    parser = Seq.prefix(Str.tag("ab"), Str.tag("cd"))
     assert {:ok, "cd", ""} = parser.("abcd")
     assert {:ok, "cd", "ef"} = parser.("abcdef")
     assert {:err, _} = parser.("abc")
@@ -30,9 +30,9 @@ defmodule Chrysopoeia.SequenceTest do
   end
 
   test "suffix" do
-    alias Chrysopoeia.Character, as: Char
+    alias Chrysopoeia.Base.String, as: Str
 
-    parser = Seq.suffix(Char.tag("ab"), Char.tag("cd"))
+    parser = Seq.suffix(Str.tag("ab"), Str.tag("cd"))
     assert {:ok, "ab", ""} = parser.("abcd")
     assert {:ok, "ab", "ef"} = parser.("abcdef")
     assert {:err, _} = parser.("abc")

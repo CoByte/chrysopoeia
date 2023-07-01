@@ -4,9 +4,9 @@ defmodule Chrysopoeia.BranchTest do
   alias Chrysopoeia.Branch, as: Branch
 
   test "alt" do
-    alias Chrysopoeia.Character, as: Char
+    alias Chrysopoeia.Base.String, as: Str
 
-    parser = Branch.alt([Char.tag("ab"), Char.tag("bc")])
+    parser = Branch.alt([Str.tag("ab"), Str.tag("bc")])
     assert {:ok, "ab", ""} = parser.("ab")
     assert {:ok, "ab", "c"} = parser.("abc")
     assert {:ok, "bc", ""} = parser.("bc")
