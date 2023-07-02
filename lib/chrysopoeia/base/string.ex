@@ -1,11 +1,14 @@
 defmodule Chrysopoeia.Base.String do
   @moduledoc """
-
+  Base module for parsing strings.
   """
+
+  alias Chrysopoeia, as: Chr
 
   @doc """
   A combinator that consumes `prefix` from the start of `input` if it matches.
   """
+  @spec tag(String.t()) :: Chr.parser(String.t(), String.t(), any())
   def tag(prefix) do
     fn str ->
       if String.starts_with?(str, prefix) do

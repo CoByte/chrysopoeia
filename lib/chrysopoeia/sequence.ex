@@ -3,6 +3,8 @@ defmodule Chrysopoeia.Sequence do
   Combinators for applying parsers in sequence.
   """
 
+  alias Chrysopoeia, as: Chr
+
   @doc """
   A combinator. Takes a list of parsers, uses each parser in the
   list sequentially, and returns a list of their outputs.
@@ -10,6 +12,7 @@ defmodule Chrysopoeia.Sequence do
   By wrapping a parser in `{:ig, parser}`, its output will not be included in
   the final output.
   """
+  # I don't know how to spec this, because non-homogenous lists are weird.
   def list(parsers) do
     &list_parser(&1, parsers)
   end
@@ -36,6 +39,8 @@ defmodule Chrysopoeia.Sequence do
   A combinator. First applies the `prefix` parser, then applies `parser`, and
   returns the result of `parser`.
   """
+  @spec prefix(Chr.parser(i, any(), e1), Chr.parser(i, o, e2)) :: Chr.parser(i, o, e1 | e2)
+        when i: var, e1: var, o: var, e2: var
   def prefix(prefix, parser) do
     fn str ->
       with {:ok, _, str} <- prefix.(str) do
@@ -48,6 +53,8 @@ defmodule Chrysopoeia.Sequence do
   A combinator. First applies `parser`, then the `suffix` parser, and returns
   the result of `parser`.
   """
+  @spec suffix(Chr.parser(i, o, e1), Chr.parser(i, any(), e2)) :: Chr.parser(i, o, e1 | e2)
+        when i: var, e1: var, o: var, e2: var
   def suffix(parser, suffix) do
     fn str ->
       with {:ok, out, str} <- parser.(str),

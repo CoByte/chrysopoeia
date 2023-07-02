@@ -1,20 +1,9 @@
 defmodule Chrysopoeia.Base.Codepoint do
   @moduledoc """
-
+  Base module for parsing codepoints.
   """
 
-  # First extracts the first codepoint from `str`, then if it exists applies
-  # `fun`, and returns the output. If a codepoint cannot be extracted (e.g. the
-  # string is not valid utf8, or is empty), returns false.
-  defp check_first_codepoint(str, fun) do
-    case str do
-      <<cp::utf8, _::binary>> ->
-        fun.(cp)
-
-      _ ->
-        false
-    end
-  end
+  alias Chrysopoeia, as: Chr
 
   # alphabetical codepoints
   @alpha_cps Stream.concat([
@@ -26,6 +15,7 @@ defmodule Chrysopoeia.Base.Codepoint do
   @doc """
   Checks if the first codepoint of `str` is alphabetical.
   """
+  @spec is_alpha?(char()) :: boolean()
   def is_alpha?(cp) do
     MapSet.member?(@alpha_cps, cp)
   end
@@ -43,6 +33,7 @@ defmodule Chrysopoeia.Base.Codepoint do
   @doc """
   Checks if `cp` is a whitespace codepoint
   """
+  @spec is_whitespace?(char()) :: boolean()
   def is_whitespace?(cp) do
     MapSet.member?(@whitespace_cps, cp)
   end
@@ -53,6 +44,7 @@ defmodule Chrysopoeia.Base.Codepoint do
   @doc """
   Checks if the first codepoint of `str` is a digit (0-9).
   """
+  @spec is_digit?(char()) :: boolean()
   def is_digit?(cp) do
     MapSet.member?(@digit_cps, cp)
   end
@@ -63,6 +55,7 @@ defmodule Chrysopoeia.Base.Codepoint do
   @doc """
   Checks if the first codepoint of `str` is either alphabetical or a digit.
   """
+  @spec is_alphanum?(char()) :: boolean()
   def is_alphanum?(cp) do
     MapSet.member?(@alphanum_cps, cp)
   end
@@ -70,6 +63,8 @@ defmodule Chrysopoeia.Base.Codepoint do
   @doc """
   Consumes the first codepoint of `str`, if possible.
   """
+  @spec first(i) :: {:ok, char(), i} | {:err, any()}
+        when i: String.t()
   def first(str) do
     case str do
       <<cp::utf8, rest::binary>> ->
@@ -83,6 +78,8 @@ defmodule Chrysopoeia.Base.Codepoint do
   @doc """
   A combinator that consumes a single codepoint, if `fun`.(codepoint) is true.
   """
+  @spec first_if((char() -> boolean())) ::
+          Chr.parser(String.t(), char(), any())
   def first_if(fun) do
     fn str ->
       with {:ok, cp, rest} <- first(str) do
@@ -100,17 +97,18 @@ defmodule Chrysopoeia.Base.Codepoint do
 
   Returns a list of codepoints.
   """
+  @spec take(char()) :: Chr.parser(String.t(), charlist(), any())
   def take(n) do
-    &take_p(&1, n, n)
+    &take_(&1, n, n)
   end
 
-  defp take_p(str, 0, _total) do
+  defp take_(str, 0, _total) do
     {:ok, [], str}
   end
 
-  defp take_p(str, n, total) do
+  defp take_(str, n, total) do
     with <<cp::utf8, rest::binary>> <- str,
-         {:ok, out, str} <- take_p(rest, n - 1, total) do
+         {:ok, out, str} <- take_(rest, n - 1, total) do
       {:ok, [cp | out], str}
     else
       _ -> {:err, "Could not take #{total} codepoints from string"}
@@ -120,14 +118,16 @@ defmodule Chrysopoeia.Base.Codepoint do
   @doc """
   A combinator that consumes codepoints while `fun`.(codepoint) is true.
   """
+  @spec take_while((char() -> boolean())) ::
+          Chr.parser(String.t(), charlist(), any())
   def take_while(fun) do
-    &take_while_p(&1, fun)
+    &take_while_(&1, fun)
   end
 
-  defp take_while_p(str, fun) do
+  defp take_while_(str, fun) do
     with <<cp::utf8, rest::binary>> <- str,
          true <- fun.(cp),
-         {:ok, out, rest} <- take_while_p(rest, fun) do
+         {:ok, out, rest} <- take_while_(rest, fun) do
       {:ok, [cp | out], rest}
     else
       _ -> {:ok, [], str}

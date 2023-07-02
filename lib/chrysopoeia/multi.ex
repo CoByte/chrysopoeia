@@ -3,29 +3,33 @@ defmodule Chrysopoeia.Multi do
   Combinators for repeatedly applying parsers.
   """
 
+  alias Chrysopoeia, as: Chr
+
   @doc """
   A combinator.
   Applies `parser` on the input as many times as it can.
 
   Must match at least `opts`[count] times (defaults to zero).
   """
+  @spec many(Chr.parser(i, o, e), count: non_neg_integer()) :: Chr.parser(i, [o], e)
+        when i: var, o: var, e: var
   def many(parser, opts \\ [count: 0]) do
-    &many_p(&1, parser, opts[:count], [])
+    &many_(&1, parser, opts[:count])
   end
 
-  @doc """
-  Function that counts down to zero.
-  """
-  def countdown(n) when n <= 0, do: 0
-  def countdown(n), do: n - 1
+  # Function that counts down to zero.
+  defp countdown(n) when n <= 0, do: 0
+  defp countdown(n), do: n - 1
 
-  defp many_p(str, parser, count, out) do
+  defp many_(str, parser, count) do
     case parser.(str) do
       {:ok, data, str} ->
-        many_p(str, parser, countdown(count), [data | out])
+        with {:ok, out, str} <- many_(str, parser, countdown(count)) do
+          {:ok, [data | out], str}
+        end
 
       {:err, _} when count <= 0 ->
-        {:ok, out, str}
+        {:ok, [], str}
 
       _ ->
         {:err, "Could not parse enough inputs"}
@@ -39,14 +43,17 @@ defmodule Chrysopoeia.Multi do
   Unlike `Multi.many`, if `parser` fails before until is found, the parser
   errors out.
   """
+  @spec many_until(Chr.parser(i, o, e1), Chr.parser(i, any(), any())) ::
+          Chr.parser(i, [o], e1 | any())
+        when i: var, o: var, e1: var
   def many_until(parser, until) do
-    &many_until_p(&1, parser, until)
+    &many_until_(&1, parser, until)
   end
 
-  defp many_until_p(str, parser, until) do
+  defp many_until_(str, parser, until) do
     with {:err, _} <- until.(str),
          {:ok, data, str} <- parser.(str),
-         {:ok, out, str} <- many_until_p(str, parser, until) do
+         {:ok, out, str} <- many_until_(str, parser, until) do
       {:ok, [data | out], str}
     else
       # parser failed
