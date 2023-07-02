@@ -1,6 +1,6 @@
 defmodule Chrysopoeia.Combinator do
   @moduledoc """
-  Core combinators.
+  Core combinators for general use.
   """
 
   @doc """

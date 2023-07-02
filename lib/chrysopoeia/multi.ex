@@ -1,6 +1,6 @@
 defmodule Chrysopoeia.Multi do
   @moduledoc """
-  Combinators for repeatedly applying parsers
+  Combinators for repeatedly applying parsers.
   """
 
   @doc """

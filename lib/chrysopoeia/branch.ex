@@ -1,6 +1,6 @@
 defmodule Chrysopoeia.Branch do
   @moduledoc """
-  Combinators that can parse multiple options
+  Combinators that can parse multiple options.
   """
 
   @doc """
