@@ -34,12 +34,14 @@ defmodule Chrysopoeia.CombinatorTest do
   end
 
   test "success" do
-    assert {:ok, "asdf"} = Comb.success("asdf")
-    assert {:ok, ""} = Comb.success("")
+    parser = Comb.success()
+    assert {:ok, nil, "asdf"} = parser.("asdf")
+    assert {:ok, nil, ""} = parser.("")
   end
 
   test "failure" do
-    assert {:err, _} = Comb.failure("asdf")
-    assert {:err, _} = Comb.failure("")
+    parser = Comb.failure()
+    assert {:err, _} = parser.("asdf")
+    assert {:err, _} = parser.("")
   end
 end

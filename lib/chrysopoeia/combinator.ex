@@ -17,15 +17,15 @@ defmodule Chrysopoeia.Combinator do
   @doc """
   Parser that always succeeds, and consumes nothing.
   """
-  def success(str) do
-    {:ok, str}
+  def success() do
+    fn str -> {:ok, nil, str} end
   end
 
   @doc """
   Parser that always errors.
   """
-  def failure(_str) do
-    {:err, "Bad parse"}
+  def failure() do
+    fn _str -> {:err, "Bad parse"} end
   end
 
   @doc """
